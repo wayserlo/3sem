@@ -1,85 +1,50 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
-
+const char *dtype_description(unsigned d_type) {
+    switch (d_type) {
+        case DT_BLK:
+            return "block device";
+        case DT_CHR:
+            return "character device";
+        case DT_DIR:
+            return "directory";
+        case DT_FIFO:
+            return "FIFO/pipe";
+        case DT_LNK:
+            return "symbolc link";
+        case DT_REG:
+            return "regular file";
+        case DT_SOCK:
+            return "UNIX domain socket";
+        default:
+            return "unknown";
+    }
+}
 
 int main(int argc, char *argv[])
 {
-	//проверяем, что ввели название
-	if (argc < 2) {
-        	printf("Enter the files names\n");
-        	return 1;
+    //проверяем, что ввели название
+    if (argc != 2) {
+        printf("Usage: %s directory\n", argv[0]);
+            return 1;
         }
 
-	//открываем каталог
-	DIR * dir = opendir( argv[1]);
-	if(dir == NULL ) {
-		perror("Failed to open directory");
-		return 1;
-	}
+    //открываем каталог
+    DIR * dir = opendir(argv[1]);
+    if(dir == NULL) {
+        perror("Failed to open directory\n");
+        return 1;
+    }
 
-	//читаем записи и выводим
-	struct dirent * list = readdir(dir);
-	printf("%s       ", list->d_name);
-	switch (list->d_type) {
-	case DT_BLK:
-                printf("block device\n");
-                break;
-	case DT_CHR:
-		printf("character device\n");
-		break;
-	case DT_DIR:
-		printf("directory\n");
-		break;
-	case DT_FIFO:
-		printf("FIFO/pipe\n");
-		break;
-	case DT_LNK:
-		printf("symbolc link\n");
-		break;
-	case DT_REG:
-		printf("regular file\n");
-		break;
-	case DT_SOCK:
-		printf("UNIX domain socket\n");
-		break;
-        case DT_UNKNOWN:
-                printf("unknown\n");
-                break;
-	}
-	while(list != NULL) {
-        	list = readdir(dir);
-        	printf("%s       ", list->d_name);
-        	switch (list->d_type) {
-        	case DT_BLK:
-        	        printf("block device\n");
-        	        break;
-        	case DT_CHR:
-                	printf("character device\n");
-                	break;
-        	case DT_DIR:
-        	        printf("directory\n");
-        	        break;
-        	case DT_FIFO:
-        	        printf("FIFO/pipe\n");
-        	        break;
-        	case DT_LNK:
-        	        printf("symbolc link\n");
-        	        break;
-        	case DT_REG:
-        	        printf("regular file\n");
-        	        break;
-        	case DT_SOCK:
-        	        printf("UNIX domain socket\n");
-        	        break;
-        	case DT_UNKNOWN:
-        	        printf("unknown\n");
-        		break;
-		}
-	}	
-	//закрываем
-	if(closedir(dir) == -1) {
-		perror("Failed to close directory");
-	}
-	return 0;
+    //читаем записи и выводим
+    struct dirent * list;
+    while((list = readdir(dir)) != NULL) {
+        printf("%-20s %s\n", dtype_description(list->d_type), list->d_name);
+    }    
+    //закрываем
+    if(closedir(dir) == -1) {
+        perror("Failed to close directory");
+    }
+    return 0;
 }

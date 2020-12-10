@@ -35,7 +35,7 @@ int main()
 	buf->y = 0;
 	buf->run = true;
 
-	printf("1. %llu %lf $lf\n", buf->i, buf->x, buf->y);
+	printf("1. %llu %lf %lf\n", buf->i, buf->x, buf->y);
 
 	pid_t child_id = fork();
 	switch (child_id) {
