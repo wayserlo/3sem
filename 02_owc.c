@@ -7,27 +7,29 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        printf("Enter the file name\n");
+    if (argc != 3) {
+        printf("Enter the file name and contents to write\n");
         return 1;
     }
-    int fd;
+    int    fd;
     fd = open(argv[1], O_RDWR | O_CREAT | O_APPEND, 00644);
     if (fd == -1) {
         perror("Failed to open");
         return 2;
     }
     if (write(fd, argv[2], strlen(argv[2])) == -1) {
-        perror("Failed to write");
-        if (close(fd) != 0) {
-            perror("Failed to close");
-            return 3;
-        }
-        return 4;
-    }
+                perror("Failed to write");
+                if (close(fd) != 0) {
+                    perror("Failed to close");
+                    return 3;
+                }
+                return 4;
+            }
+
     if (close(fd) != 0) {
         perror("Failed to close");
         return 3;
     }
     return 0;
+
 }
