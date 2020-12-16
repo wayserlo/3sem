@@ -15,11 +15,10 @@ int main(int argc, char* argv[])
         perror("Failed to statfs");
         return 2;
     }
-    printf("Optimal block size: %u\n", statfs_buf.f_bsize);
-    printf("Total number of data blocks: %llu\n", statfs_buf.f_blocks);
-    printf("Number of free data blocks: %llu\n", statfs_buf.f_bfree);
-    printf("Number of available data blocks: %llu\n", statfs_buf.f_bavail);
-    printf("Number of used data blocks: %llu\n", statfs_buf.f_blocks - statfs_buf.f_bfree);
+    printf("Total number of data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_blocks);
+    printf("Number of free data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_bfree);
+    printf("Number of available data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_bavail);
+    printf("Number of used data blocks: %llu bytes\n", statfs_buf.f_bsize*(statfs_buf.f_blocks - statfs_buf.f_bfree));
 
     return 0;
 }
