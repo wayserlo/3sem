@@ -70,8 +70,11 @@ int main(int argc, char *argv[]) {
             bytes_written += (size_t)result;
         }
     }
-    fsync(fd2);
     int res = 0;
+    if(fsync(fd2) == -1) {
+        perror("Failed to fsync");
+        res = 7;
+    }
 //меняем время на втором файле, устанавливая время первого до доступа
 #ifdef __APPLE__
     struct timespec ch[2] = {stat_buf.st_atimespec, stat_buf.st_mtimespec};

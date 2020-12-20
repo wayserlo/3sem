@@ -68,6 +68,10 @@ main(int argc, char *argv[])
         }
     }
     int res = 0;
+    if(fsync(fd2) == -1) {
+        perror("Failed to fsync");
+        res = 7;
+    }
     //закрываем файлы
     if(close(fd1) == -1) {
         perror("Failed to close src");
