@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 const char *dtype_description(unsigned d_type) {
     switch (d_type) {
@@ -68,7 +69,11 @@ int main(int argc, char *argv[])
     struct dirent * list;
     struct stat stat_buf;
     const char* the_type;
-    while((list = readdir(dir)) != NULL) {
+    while(1) {
+        errno = 0;
+        if((list = readdir(dir)) != NULL) {
+            break;
+        }
         if(list->d_type != DT_UNKNOWN) {
             the_type = dtype_description(list->d_type);
         } else {
@@ -79,10 +84,16 @@ int main(int argc, char *argv[])
         }
         printf("%-20s %s\n", the_type, list->d_name);
     }
+    int res = 0;
+    if(errno) {
+        perror("Error while reading directory contents");
+        res = 2;
+    }
 
     //закрываем
     if(closedir(dir) == -1) {
         perror("Failed to close directory");
+        res = 3;
     }
-    return 0;
+    return res;
 }
