@@ -22,7 +22,7 @@ main(int argc, char *argv[])
                 perror("Failed to stat");
                 return 2;
         }
-	if((stat_buf.st_mode & S_IFMT) != S_IFREG) {
+	if(!S_ISREG(stat_buf.st_mode)) {
 		perror("File is not regular");
 		return 2;
 	}
@@ -38,29 +38,44 @@ main(int argc, char *argv[])
 	fd2 = open(argv[2], O_RDWR | O_CREAT | O_APPEND, 0644);
         if (fd2 == -1) {
                 perror("Failed to open");
+                close(fd1);
                 return 3;
         }
 	
 	//читаем и пишем
-	char buffer[BUFSIZE];
-	int k = read(fd1, buffer, BUFSIZE);
-	while(k>0) {
-		if(k == -1) {
-			perror("Failed to read");
-			return 4;
-		}
-		if(write(fd2, buffer, k) == -1) {
-			perror("Failed to write");
-			return 4;
-		}
-		k = read(fd1, buffer, BUFSIZE);
-		}
-
-	//закрываем файлы
-	if ((close(fd1) != 0) || (close(fd2) != 0)) {
-                perror("Failed to close");
-                return 5;
+    char buffer[BUFSIZE];
+    while(1) {
+        ssize_t k = read(fd1, buffer, sizeof(buffer));
+        if(k == -1) {
+            perror("Failed to read");
+            close(fd1);
+            close(fd2);
+            return 4;
         }
-
-	return 0;
+        if(k == 0) {
+            break;
+        }
+        size_t bytes_written = 0;
+        while(bytes_written < (size_t)k) {
+            ssize_t result = write(fd2, &buffer[bytes_written], (size_t)k - bytes_written);
+            if(result == -1) {
+                perror("Failed to write");
+                close(fd1);
+                close(fd2);
+                return 4;
+            }
+            bytes_written += (size_t)result;
+        }
+    }
+    int res = 0;
+    //закрываем файлы
+    if(close(fd1) == -1) {
+        perror("Failed to close src");
+        res = 5;
+    }
+    if(close(fd2) == -1) {
+        perror("Failed to close dst");
+        res = 5;
+    }
+	return res;
 }

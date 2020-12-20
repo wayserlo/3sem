@@ -59,11 +59,15 @@ main(int argc, char *argv[])
 		move +=k;
 		}
 
-	//закрываем файлы
-	if ((close(fd1) != 0) || (close(fd2) != 0)) {
-                perror("Failed to close");
-                return 5;
-        }
-
-	return 0;
+    int res = 0;
+    //закрываем файлы
+    if(close(fd1) == -1) {
+        perror("Failed to close src");
+        res = 5;
+    }
+    if(close(fd2) == -1) {
+        perror("Failed to close dst");
+        res = 5;
+    }
+    return res;
 }
