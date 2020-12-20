@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -32,7 +33,7 @@ const char *ftype_description(mode_t f_type) {
             return "block device";
         case S_IFCHR:
             return "character device";
-        case DT_DIR:
+        case S_IFDIR:
             return "directory";
         case S_IFIFO:
             return "FIFO/pipe";
@@ -66,17 +67,17 @@ int main(int argc, char *argv[])
     //читаем записи и выводим
     struct dirent * list;
     struct stat stat_buf;
-    char str[]="unknown";
+    const char* the_type;
     while((list = readdir(dir)) != NULL) {
-        if(strcmp(dtype_description(list->d_type), str) != 0) {
-            printf("%-20s %s\n", dtype_description(list->d_type), list->d_name);
+        if(list->d_type != DT_UNKNOWN) {
+            the_type = dtype_description(list->d_type);
         } else {
-            if (lstat(list->d_name, &stat_buf) == -1) {
-                perror("Failed to stat");
-                return 2;
+            if (fstatat(dirfd(dir), list->d_name, &stat_buf, AT_SYMLINK_NOFOLLOW) == -1) {//использовать fstatat, чтобы путь к файлу нормально отображался
+                perror("Failed to fstatat");
             }
-            printf("%-20s %s\n", ftype_description(stat_buf.st_mode & S_IFMT), list->d_name);
+            the_type = ftype_description(stat_buf.st_mode & S_IFMT);
         }
+        printf("%-20s %s\n", the_type, list->d_name);
     }
 
     //закрываем

@@ -9,7 +9,9 @@
 #include <sys/time.h>
 #include <stdint.h>
 #define BUFSIZE 512
-
+#ifndef ALLPERMS
+#define ALLPERMS 07777
+#endif
 int main(int argc, char *argv[]) {
 // проверяем, чтобы на вход подавалось 2 аргумента
     if (argc != 3) {
@@ -81,7 +83,7 @@ int main(int argc, char *argv[]) {
         perror("Failed to futimens");
         res = 5;
     }
-    if(fchmod(fd2, stat_buf.st_mode) == -1) {
+    if(fchmod(fd2, stat_buf.st_mode & ALLPERMS) == -1) {
         perror("Failed to fcmod");
         res = 5;
     }

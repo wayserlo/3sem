@@ -1,7 +1,5 @@
-//#include <sys/vfs.h>
+#include <sys/statvfs.h>
 #include <stdio.h>
-#include <sys/param.h>
-#include <sys/mount.h>
 
 int main(int argc, char* argv[])
 {
@@ -10,15 +8,15 @@ int main(int argc, char* argv[])
             return 1;
     }
     
-    struct statfs statfs_buf;
-    if(statfs(argv[1], &statfs_buf) == -1) {
+    struct statvfs statvfs_buf;
+    if(statvfs(argv[1], &statvfs_buf) == -1) {
         perror("Failed to statfs");
         return 2;
     }
-    printf("Total number of data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_blocks);
-    printf("Number of free data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_bfree);
-    printf("Number of available data blocks: %llu bytes\n", statfs_buf.f_bsize*statfs_buf.f_bavail);
-    printf("Number of used data blocks: %llu bytes\n", statfs_buf.f_bsize*(statfs_buf.f_blocks - statfs_buf.f_bfree));
+    printf("Total number of data blocks: %lu bytes\n", statvfs_buf.f_frsize*statvfs_buf.f_blocks);
+    printf("Number of free data blocks: %lu bytes\n", statvfs_buf.f_frsize*statvfs_buf.f_bfree);
+    printf("Number of available data blocks: %lu bytes\n", statvfs_buf.f_frsize*statvfs_buf.f_bavail);
+    printf("Number of used data blocks: %lu bytes\n", statvfs_buf.f_frsize*statvfs_buf.f_blocks - statvfs_buf.f_frsize*statvfs_buf.f_bfree);
 
     return 0;
 }
