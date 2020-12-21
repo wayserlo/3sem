@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#define BUFSIZE 256
 
 int main(void) {
     //открываем файл
@@ -17,14 +16,19 @@ int main(void) {
         return 1;
     }
     //блокируем его эксклюзивной блокировкой, чтобы одновременные процессы не перекрывались 
-    if(flock(fd, LOCK_EX) == -1) {
+    struct stat* buf = NULL;
+    if(fstat(fd, buf) == -1) {
+        perror("Failed to fstat");
+        close(fd);
+        return 2;
+    }
+    if(lockf(fd, F_LOCK, buf->st_size) == -1) {
         perror("Failed to block");
         close(fd);
         return 2;
     }
-    
     //читаем, что там написано и прибавляем +1
-    char count[BUFSIZE];
+    void* count = NULL;
     if(read(fd, count, sizeof(count)) == -1) {
         perror("Failed to read");
         close(fd);
@@ -49,7 +53,7 @@ int main(void) {
     }
 
     //снимаем блокировку и закрываем
-    if(flock(fd, LOCK_UN) == -1) {
+    if(lockf(fd, F_ULOCK, buf->st_size) == -1) {
         perror("Failed to unblock");
         close(fd);
         return 2;
